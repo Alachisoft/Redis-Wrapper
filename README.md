@@ -10,6 +10,20 @@ A compatibility layer that enables .NET applications to use [NCache](https://www
 | Alachisoft.NCache.SDK | >= 5.3.6.2 |
 | Supported StackExchange.Redis | >= 2.12.14 |
 
+## Installation
+
+Install the package using the .NET CLI:
+
+```bash
+dotnet add package NCache.OSS.StackExchange.Redis.Wrapper --version 5.3.6.2
+```
+
+Or install it using the Package Manager Console:
+
+```powershell
+Install-Package NCache.OSS.StackExchange.Redis.Wrapper -Version 5.3.6.2
+```
+
 ## Overview
 
 NCache is an extremely fast and scalable distributed cache for .NET applications. This wrapper allows you to migrate from Redis to NCache with minimal code changes by providing implementations of the StackExchange.Redis interfaces.
