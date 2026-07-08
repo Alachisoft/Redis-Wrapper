@@ -36,6 +36,12 @@ NCache is an extremely fast and scalable distributed cache for .NET applications
 
 ## Getting Started
 
+## Prerequisites
+
+Before using this package, ensure you have:
+
+**An NCache cache** – created and running on the cluster.
+   
 ### 1. Configure the cache name
 
 The wrapper resolves which NCache cache to connect to from a single identifier, typically read from your app's configuration:
@@ -82,6 +88,10 @@ ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
 });
 ```
 
+### NCache.StackExchange.Redis.Sample
+
+The application acts as a test suite, targeting all APIs defined within the wrapper. Simply plug in your cache and run Program.cs.
+
 ## License
 
 Copyright © 2005-2026 Alachisoft. All rights reserved.
@@ -91,3 +101,5 @@ Copyright © 2005-2026 Alachisoft. All rights reserved.
 - [NCache Documentation](https://www.alachisoft.com/resources/docs/)
 - [NCache Open Source](https://github.com/Alachisoft/NCache)
 - [Alachisoft Website](https://www.alachisoft.com/ncache/)
+- [Redis Wrapper Documentation](https://www.alachisoft.com/resources/docs/ncache/prog-guide/migrate-redis-app-ncache.html)
+- [Redis Wrapper Nuget](https://www.nuget.org/packages/NCache.OSS.StackExchange.Redis.Wrapper)
