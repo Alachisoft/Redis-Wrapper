@@ -1,5 +1,7 @@
 ﻿# NCache OSS Wrapper for StackExchange.Redis
 
+[![Build](https://github.com/Alachisoft/Redis-Wrapper/actions/workflows/build.yml/badge.svg)](https://github.com/Alachisoft/Redis-Wrapper/actions/workflows/build.yml)
+
 A compatibility layer that enables .NET applications to use [NCache](https://www.alachisoft.com/ncache/) as a drop-in replacement for Redis with the familiar StackExchange.Redis API.
 
 ## Package Versions
@@ -91,6 +93,14 @@ ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
 ### NCache.StackExchange.Redis.Sample
 
 The application acts as a test suite, targeting all APIs defined within the wrapper. Simply plug in your cache and run Program.cs.
+
+It prints a pass/fail/error tally and exits with a non-zero code if anything failed or threw, so it can be used as a build gate. By default it reads the cache name from `App.config` and the server list from `client.ncconf`; these environment variables override that, which is how the workflow points it at a cache it starts itself:
+
+| Variable | Purpose |
+|---|---|
+| `NCACHE_CACHE_NAME` | Cache to connect to, instead of the `CacheId` app setting |
+| `NCACHE_SERVER` | Cache server address, instead of the `client.ncconf` server list |
+| `NCACHE_PORT` | Client port, defaults to `9800` |
 
 ## License
 
