@@ -46,8 +46,7 @@ namespace BasicUsageStackExchangeRedis
             return failedTests + erroredTests == 0 ? 0 : 1;
         }
 
-        // Keeps the original behaviour when a developer runs the sample from a console,
-        // but returns straight away on a build server where there is no keyboard to read.
+        // for CI pipeline
         private static void WaitForKeyPress()
         {
             if (Console.IsInputRedirected || Environment.GetEnvironmentVariable("CI") == "true")
