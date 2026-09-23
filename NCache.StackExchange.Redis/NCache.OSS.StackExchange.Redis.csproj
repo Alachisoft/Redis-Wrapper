@@ -19,6 +19,13 @@
 		<PackageReference Include="System.Buffers" Version="4.6.1" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+		<!-- Supplies the .NET Framework reference assemblies so the net462 target builds
+		     on any machine, instead of only where a matching targeting pack is installed.
+		     Build-time only: it is not a dependency of the published package. -->
+		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<None Update="client.ncconf">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>

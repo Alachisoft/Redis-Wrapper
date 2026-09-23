@@ -36,6 +36,7 @@ namespace NCache.OSS.StackExchange.Redis.Sample
                 Console.Write("\n\n");
             }
 
+            Program.erroredTests++;
             Console.ForegroundColor = color;
         }
 

@@ -10,6 +10,7 @@ using NCache.OSS.StackExchange.Redis.Sample.KeyOperations;
 using NCache.OSS.StackExchange.Redis.Sample.LockOperations;
 using NCache.OSS.StackExchange.Redis.Sample.PubSubOperations;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 
 namespace BasicUsageStackExchangeRedis
@@ -19,30 +20,53 @@ namespace BasicUsageStackExchangeRedis
 
         public static int successfulTests = 0;
         public static int failedTests = 0;
+        public static int erroredTests = 0;
         public static INCacheDatabase db;
         public static string myObjectForCaching = "This is my Object";
         public static ICache cache;
         public static ConnectionMultiplexer mux;
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             try
             {
                 InitializeClient();
                 RunAllTests();
-
-                Console.WriteLine($"Test completed successfully.\nSuccessful Tests: {successfulTests}\nFailed Tests: {failedTests}\nPress any key to exit...");
-                Console.ReadKey();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Exception: " + ex.Message);
+                return 1;
             }
+
+            Console.WriteLine($"Test run completed.\nSuccessful Tests: {successfulTests}\nFailed Tests: {failedTests}\nErrored Tests: {erroredTests}");
+
+            WaitForKeyPress();
+
+            return failedTests + erroredTests == 0 ? 0 : 1;
+        }
+
+        // Keeps the original behaviour when a developer runs the sample from a console,
+        // but returns straight away on a build server where there is no keyboard to read.
+        private static void WaitForKeyPress()
+        {
+            if (Console.IsInputRedirected || Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
 
         private static void InitializeClient()
         {
-            string cacheName = ConfigurationManager.AppSettings["CacheId"];
+            string cacheName = Environment.GetEnvironmentVariable("NCACHE_CACHE_NAME");
+
+            if (string.IsNullOrWhiteSpace(cacheName))
+            {
+                cacheName = ConfigurationManager.AppSettings["CacheId"];
+            }
 
             Microsoft.Extensions.Logging.ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -51,12 +75,32 @@ namespace BasicUsageStackExchangeRedis
                     .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
             });
 
-            mux = ConnectionMultiplexer.Connect(cacheName);
+            mux = ConnectionMultiplexer.Connect(cacheName, GetConnectionOptions());
 
             cache = mux.GetNCacheInterface(cacheName);
             cache.Clear();
 
             db = mux.GetDatabase();
+        }
+
+        private static CacheConnectionOptions GetConnectionOptions()
+        {
+            string server = Environment.GetEnvironmentVariable("NCACHE_SERVER");
+
+            if (string.IsNullOrWhiteSpace(server))
+            {
+                return null;
+            }
+
+            if (!int.TryParse(Environment.GetEnvironmentVariable("NCACHE_PORT"), out int port))
+            {
+                port = 9800;
+            }
+
+            return new CacheConnectionOptions
+            {
+                ServerList = new List<ServerInfo> { new ServerInfo(server, port) }
+            };
         }
 
         private static void RunAllTests()
