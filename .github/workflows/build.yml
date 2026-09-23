@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push to the same PR/branch cancels the run that is still in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build solution
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # The wrapper multi-targets netstandard2.0/net462 and the sample targets
+          # net8.0; the net462 reference assemblies come from NuGet during restore.
+          dotnet-version: 8.0.x
+
+      - name: Build
+        run: dotnet build NCache.OSS.StackExchange.Redis.sln --configuration Release
+
+  test:
+    name: Unit tests
+    # Linux, because the tests need a live NCache server and the NCache image is a
+    # Linux container. Windows runners cannot run it.
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Start NCache
+        env:
+          NCACHE_REGISTRATION_KEY: ${{ secrets.NCACHE_REGISTRATION_KEY }}
+          NCACHE_REGISTRATION_EMAIL: ${{ secrets.NCACHE_REGISTRATION_EMAIL }}
+        run: bash .github/scripts/start-ncache.sh
+
+      # The sample picks up NCACHE_SERVER and NCACHE_CACHE_NAME from the environment
+      # and returns a non-zero exit code when any test fails or throws.
+      - name: Run tests
+        run: dotnet run --project NCache.StackExchange.Redis.Sample/NCache.OSS.StackExchange.Redis.Sample.csproj --configuration Release
+
+      - name: NCache server logs
+        if: failure()
+        run: docker logs ncache
+
+      - name: Stop NCache
+        if: always()
+        run: docker rm --force ncache
